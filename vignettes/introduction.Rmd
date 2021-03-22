@@ -1,0 +1,131 @@
+---
+title: "Introduction to GFS3000AnalysR"
+output: rmarkdown::html_vignette
+description: >
+  A quick guide on how to use the GFS3000AnalysR package. Includes an example.
+  This package should allow easy import of GFS3000 .csv data.
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+
+## Quick guide
+
+This is a quick quide on how to use the GFS3000AnalysR package to import 
+GFS3000 .csv files easily into R.
+
+First load the package.
+
+```{r setup}
+library(GFS3000AnalysR)
+```
+
+### Import files
+
+Using a path to your file of interest (here a path to the example data set
+is used) use the `import.single.GFS3000()` function to import your data.
+
+* file - corresponds to the filepath
+* names - option to add a name column
+* time0s - option to add a column that has time in mins - with time 0  as your time of choice. Must be a string "yyyy-m-d H:M:S".
+
+```{r}
+#Path to example dataset
+path = system.file("extdata", "exampleData.csv",package = "GFS3000AnalysR")
+
+#Import the data
+dataframe = import.single.GFS3000(file = path, names = "Name", time0s = "2019-11-04 13:59:43")
+```
+
+If you had multiple runs in a single .csv file (with plants under different 
+object numbers) you can still use `import.single.GFS3000()`. An example is 
+shown below.
+
+* names - an optional list of names, where the first name corresponds to object 0001, the second to object 0002, etc...
+* time0s - an optional list of time0s ("yyyy-m-d H:M:S"), the first corresponds to object 0001, the second to object 0002, etc...
+
+```{r, warning=FALSE}
+#Importing multiuple runs from a single .csv file
+dataframe = import.single.GFS3000(file = path, 
+                                  names = c("Name1","Name2"), 
+                                  time0s = c("2019-11-04 13:59:43", "2019-11-04 15:59:43"))
+```
+
+If you had multiple runs over multiple files (a single run on each file) you
+can use the `import.multiple.GFS3000` function. This reads all of the files
+and outputs them into one big file.
+
+* files - a list of file paths
+* names - a list of names for each file
+* time0s - an optional list of time0s ("yyyy-m-d H:M:S") for each file
+
+```{r, include=FALSE}
+path1= path
+path2=path
+path3=path
+```
+
+
+```{r, warning=FALSE}
+#Importing runs over multiple .csv files
+dataframe = import.multiple.GFS3000(files = c(path1,path2,path3),
+                                    names =  c("Name1","Name2","Name3"),
+                                    time0s = c("2019-11-04 13:59:43", 
+                                               "2019-11-05 13:59:43", 
+                                               "2019-11-06 15:59:43"))
+```
+
+### Change leaf area
+
+If you want to change the leaf area of a run you can use the `changeLeafArea()`
+function.
+
+* dataframe - the dataframe of interest
+* leafArea - new leaf area in cm2
+* objectNo - the object number of the leaf you are changing
+
+This function recalculates E, GH2O, A, and ci.
+
+```{r}
+#Path to example dataset
+path = system.file("extdata", "exampleData.csv",package = "GFS3000AnalysR")
+
+#Import the data
+dataframe = import.single.GFS3000(file = path, names = "Name", time0s = "2019-11-04 13:59:43")
+
+#Change leaf area
+dataframe = changeLeafArea(dataframe = dataframe,
+                           leafArea = 1.74,
+                           objectNo = 1)
+
+```
+
+### Easy plotting of data
+
+After import, the dataframe should be easily plotted using ggplot2 or your 
+favourite method of visualising data in R. Here, graphs with time in mins 
+(determined from the time0 import variable) or in the %Y-%m-%d %H:%M:%S date/
+time format.
+
+```{r}
+library(ggplot2)
+
+ggplot(dataframe, aes(TimeNo, GH2O, color = Name)) +
+  geom_point()
+
+ggplot(dataframe, aes(DateTime, GH2O, color = Name)) +
+  geom_point()
+
+```
+
+
