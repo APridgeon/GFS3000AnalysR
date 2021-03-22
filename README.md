@@ -9,7 +9,7 @@ This is designed with stomatal conductance timecourse experiments in mind.
 You can install this in R using the `devtools::install_github()` function
 
 ```r
-"devtools::install_github("APridgeon/GFS3000AnalysR")"
+devtools::install_github("APridgeon/GFS3000AnalysR")
 ```
 
 ## Usage
